@@ -2,3 +2,7 @@
 */__pycache
 *.so
 *.pyc
+*/hyts_std
+*/CONTROL
+*/MESSAGE
+*/WARNING
