@@ -1,6 +1,9 @@
 import numpy as np, pandas as pd
-import os, glob, subprocess
+import os, glob
+import shutil, subprocess
 from shutil import copyfile, copy2
+import multiprocessing as mp
+from joblib import Parallel, delayed, parallel_backend
 
 class HyControl(object):
     def __init__(
@@ -154,31 +157,48 @@ class HyControl(object):
         ts = name.split(" ")
         name = "".join(ts)
         return name
+        
+        
+        
+class HyParallel:
+    def __init__(
+        self,
+        files,
+        ncpu=4,
+        temp_folder="/home/pankaj/phd/code/hytraj/test",
+        working="/home/pankaj/phd/code/hytraj/working",
+    ):
+        self.files = files
+        self.ncpu = ncpu
+        self.temp_folder = temp_folder
+        self.working = working
 
+    def run(self):
+        files = glob.glob(self.working + "/*")
+        files = [os.path.abspath(filename) for filename in files]
+        if not os.path.exists(self.temp_folder):
+            os.mkdir(os.path.abspath(self.temp_folder))
 
-heights = [500]
-run_time = -360
-years = np.arange(1980, 2019)
+        for i in np.arange(self.ncpu):
+            fold = self.temp_folder + "/cpu%s" % i
+            if not os.path.exists(fold):
+                os.mkdir(os.path.abspath(fold))
+            [shutil.copy2(filename, fold) for filename in files]
 
-stations = ["davs", "marb", "mcmu", "spol", "syow", "neum"]
-metdir = "/home/geoschem/hysplit/ncep/"
-outbase = "/home/geoschem/hysplit/trajectories/ncep/all/"
-working = "./"
+        try:
+            Parallel(n_jobs=self.ncpu)(
+                delayed(self.run_parallel)(i) for i in np.arange(self.ncpu)
+            )
+            shutil.rmtree(self.temp_folder)
+        except:
+            shutil.rmtree(self.temp_folder)
 
-for height in heights:
-    outdir = outbase + str(height) + "/"
-    if not os.path.exists(outdir):
-        os.mkdir(outdir)
-    for year in years:
-        hy = HyGen(
-            year,
-            stations,
-            height,
-            run_time,
-            working,
-            metdir,
-            outdir,
-            met_type="ncep",
-            hysplit="/home/geoschem/hysplit/bin/hyts_std",
-        )
-        hy = hy.run(vertical=0, model_top=10000.0)
+        print("HySPLIT run over!!!!")
+
+    def run_parallel(self, i):
+        nfiles = np.array_split(self.files, self.ncpu)[i]
+        fold = self.temp_folder + "/cpu%s" % i
+        os.chdir(fold)
+        for filename in nfiles:
+            shutil.copy2(filename, fold + "/CONTROL")
+            subprocess.call("./hyts_std")
