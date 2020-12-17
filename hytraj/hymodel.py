@@ -11,7 +11,7 @@ def normalize(data):
     return data
 
 
-class Receptor:
+class HyReceptor:
     def __init__(
         self,
         ozone,

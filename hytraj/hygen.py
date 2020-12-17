@@ -142,7 +142,8 @@ class HyGen(object):
         ts = name.split(" ")
         name = "".join(ts)
         return name
-        
+
+
 class HyControl(HyGen):
     def __init__(
         self,
@@ -168,7 +169,7 @@ class HyControl(HyGen):
     ):
         self.dates = dates
         os.chdir(self.workpath)
-        for date in tqdm(self.dates):
+        for date in self.dates:
             start_time = self.get_hydate(date)
             outfile = (
                 self.outdir
@@ -188,7 +189,8 @@ class HyControl(HyGen):
             )
             copy2(self.workpath + "CONTROL", cdir + self.get_out_date(date))
         return self
-        
+
+
 class HyParallel:
     def __init__(
         self,
