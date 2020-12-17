@@ -1,6 +1,22 @@
 # HyTraj
 
-This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. **Will be released as a python package (pip installable) very soon**.
+This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
+
+**Will be released as a python package (pip installable) very soon**.
+
+# Usage
+
+See [this notebook](example3.ipynb) for example usecase.
+
+```python
+met_type = "ncep"
+dates = pd.date_range("2010-02-01", freq="24H", end="2010-02-10")
+hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
+data = hy.run(dates, njobs=7)
+hy.plot(data["Neumayer"], vertical="alt", show=True)
+```
+
+![Example Trajectories](ex.png){width=90%}
 
 ## Work in progress
 
@@ -29,4 +45,4 @@ This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hy
 6. **[HyReceptor](./hytraj/hymodel.py):** Receptor Modeling (**single site** [weighted](https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub) and unweighted **[Concentration weighted Trajectory (CWT), Potential Source Contribution Function (PSCF) and Residence Time Weighted Concentration (RTWC)](https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub)**).
 
 
-**PS:** Find pre-built HYSPLIT executable at [this link](https://github.com/rich-iannone/splitr/tree/master/extras/).
+**PS:** Find pre-built HYSPLIT executable at [this link](https://github.com/rich-iannone/splitr/tree/master/extras/) and copy executebles to working directory.
