@@ -2,6 +2,10 @@ import numpy as np
 import pandas as pd
 import os, glob, subprocess
 from tqdm import tqdm
+import shutil
+from shutil import copyfile, copy2
+import multiprocessing as mp
+from joblib import Parallel, delayed, parallel_backend
 
 
 class HyGen(object):
@@ -138,3 +142,92 @@ class HyGen(object):
         ts = name.split(" ")
         name = "".join(ts)
         return name
+        
+class HyControl(HyGen):
+    def __init__(
+        self,
+        locations,
+        height,
+        run_time,
+        working,
+        metdir,
+        outdir,
+        met_type="ncep",
+        exe="./hyts_std",
+    ):
+        super().__init__(
+            locations, height, run_time, working, metdir, outdir, met_type, exe
+        )
+
+    def run(
+        self,
+        dates,
+        vertical=0,
+        model_top=10000.0,
+        cdir="/home/geoschem/hysplit/trajectories/ncep/all/control/",
+    ):
+        self.dates = dates
+        os.chdir(self.workpath)
+        for date in tqdm(self.dates):
+            start_time = self.get_hydate(date)
+            outfile = (
+                self.outdir
+                + self.met_type
+                + "."
+                + str(self.height)
+                + "."
+                + self.get_out_date(date)
+            )
+            if self.met_type == "ncep":
+                metfiles = self.get_ncep_metfiles(date)
+            else:
+                metfiles = self.get_gdas_metfiles(date)
+            metfiles = [self.metdir + filename for filename in metfiles]
+            self.create_control_file(
+                start_time, metfiles, outfile, vertical=vertical, model_top=model_top
+            )
+            copy2(self.workpath + "CONTROL", cdir + self.get_out_date(date))
+        return self
+        
+class HyParallel:
+    def __init__(
+        self,
+        files,
+        ncpu=4,
+        temp_folder="/home/pankaj/phd/code/hytraj/test",
+        working="/home/pankaj/phd/code/hytraj/working",
+    ):
+        self.files = files
+        self.ncpu = ncpu
+        self.temp_folder = temp_folder
+        self.working = working
+
+    def run(self):
+        files = glob.glob(self.working + "/*")
+        files = [os.path.abspath(filename) for filename in files]
+        if not os.path.exists(self.temp_folder):
+            os.mkdir(os.path.abspath(self.temp_folder))
+
+        for i in np.arange(self.ncpu):
+            fold = self.temp_folder + "/cpu%s" % i
+            if not os.path.exists(fold):
+                os.mkdir(os.path.abspath(fold))
+            [shutil.copy2(filename, fold) for filename in files]
+
+        try:
+            Parallel(n_jobs=self.ncpu)(
+                delayed(self.run_parallel)(i) for i in np.arange(self.ncpu)
+            )
+            shutil.rmtree(self.temp_folder)
+        except:
+            shutil.rmtree(self.temp_folder)
+
+        print("HySPLIT run over!!!!")
+
+    def run_parallel(self, i):
+        nfiles = np.array_split(self.files, self.ncpu)[i]
+        fold = self.temp_folder + "/cpu%s" % i
+        os.chdir(fold)
+        for filename in nfiles:
+            shutil.copy2(filename, fold + "/CONTROL")
+            subprocess.call("./hyts_std")
