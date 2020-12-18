@@ -1,0 +1,7 @@
+numpy
+pandas
+xarray
+matplotlib
+sklearn
+pywt
+
