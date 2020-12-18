@@ -32,9 +32,7 @@ hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
 data = hy.run(dates, njobs=7)
 hy.plot(data["Neumayer"], vertical="alt", show=True)
 ```
-<center>
 ![Example Trajectories](ex.png)
-</center>
 
 ## Work in progress
 
