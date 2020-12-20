@@ -4,7 +4,7 @@ This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hy
 
 ## Installation
 
-### Install using pip command:
+### Install using pip:
 
 ```bash
 pip install git+https://github.com/pankajkarman/HyTraj.git
@@ -26,6 +26,15 @@ make conda
 See [this notebook](example3.ipynb) for example usecase.
 
 ```python
+
+import hytraj as ht
+```
+
+### Generate Trajectories
+
+```python
+from hytraj import HyTraj
+
 met_type = "ncep"
 dates = pd.date_range("2010-02-01", freq="24H", end="2010-02-10")
 hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
@@ -34,19 +43,32 @@ hy.plot(data["Neumayer"], vertical="alt", show=True)
 ```
 ![Example Trajectories](ex.png)
 
-## Work in progress
+### Cluster Trajectories
 
-1. **HyRep:** Representational learning of trajectories for subsequent analysis. (**Wavelet transform done**, *AutoEncoder  (both simple and variational) in progress*.)
+```python
+from hytraj import HyCluster
 
-2. **[HyCluster](./hytraj/hycluster.py):** Clustering of trajectories (**[Quick Bundle](./hytraj/quick.py), Hierarchical and K-Means clustering done.** Self Organising map (SOM) to be implemented). *It will support different distance metrics for Hierarchical Clustering like **Dynamic time warping (DTW), Edit distance on real sequence (EDR), Longest common subsequences (LCSS) and symmetrized segment-path distance (SSPD)** on completion.*
+labels = HyCluster(data).fit(kmax=10, method='KMeans')
 
-3. **Multi-sites Receptor Modeling**
+```
 
-4. **GUI:** Medium-term goal 
+### Perform Receptor Modeling
 
-5. **Bayesian Inversion:** long-term goal
+```python
+from hytraj import HyReceptor, HyData
 
-## Implemented (Working)
+station = 'South Pole'
+data = HyData(files, stations).read()[station]
+model = HyReceptor(ozone, data, station_name="South Pole")
+cwt = model.calculate_cwt(weighted=False)
+pscf = model.calculate_pscf(thresh=0.95)
+rtwc = model.calculate_rtwc(normalise=True)
+model.plot_map(rtwc, boundinglat=-25)
+
+
+```
+
+## Features
 
 1. **[HyTraj](./hytraj/__init__.py):** Higher level implementation of **Parallel Generation, reading and plotting** of Trajectories (**Recommended**).
 
@@ -58,7 +80,18 @@ hy.plot(data["Neumayer"], vertical="alt", show=True)
 
 5. **[HyData](./hytraj/hyread.py):** Reading and binning trajectories data (NetCDF with xarray support).
 
-6. **[HyReceptor](./hytraj/hymodel.py):** Receptor Modeling (**single site** [weighted](https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub) and unweighted **[Concentration weighted Trajectory (CWT), Potential Source Contribution Function (PSCF) and Residence Time Weighted Concentration (RTWC)](https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub)**).
+6. **[HyCluster](./hytraj/hycluster.py):** Clustering of trajectories with KMeans using wavelet features.
+
+6. **[HyReceptor](./hytraj/hymodel.py):** [Single site Receptor Modeling](https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub) ( both [weighted](https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub) and unweighted):
+    - Concentration weighted Trajectory (CWT)
+    - Potential Source Contribution Function (PSCF) 
+    - Residence Time Weighted Concentration (RTWC)
+
+## To do
+
+1. **GUI:** Medium-term goal 
+
+2. **Bayesian Inversion:** long-term goal
 
 
 **PS:** Find **pre-built HYSPLIT executable** at [this link](https://github.com/rich-iannone/splitr/tree/master/extras/) and copy **executeble** to working directory.

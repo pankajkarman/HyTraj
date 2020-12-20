@@ -1,61 +1,37 @@
-import glob, pickle, os, pywt, pyclustering, seaborn as sns
 
-os.environ["PROJ_LIB"] = "/home/pankaj/.local/Anaconda3/share/proj"
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
-import xarray as xr, salem, utils, geopandas as gpd
-from mpl_toolkits.basemap import Basemap, addcyclic, cm
+import glob, pywt, pyclustering
+from mpl_toolkits.basemap import Basemap
+
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+from pyclustering.cluster.elbow import elbow
 
-# from pyclustering.cluster.elbow import elbow
+import xarray as xr
 
+class HyCluster:
+    def __init__(self, data):
+        self.data = data
 
-class TrajMining:
+    def fit(self, kmax=50, method="KMeans", pyclus=True):
+        feat = HyWave(self.data).fit(scale=False)
+        labels = Trajclustering(feat).fit(kmax=kmax, pyclus=pyclus)
+        return labels
+
+class HyWave:
     def __init__(
-        self,
-        station,
-        height,
-        station_name=None,
-        tdir="/home/pankaj/phd/tropo/antarctic/causal/data/traj",
-        projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30),
+        self, data, projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30)
     ):
-        name = {
-            "spol": "South Pole",
-            "neum": "Neumayer",
-            "mcmu": "McMurdo",
-            "arht": "Arrival Height",
-            "syow": "Syowa",
-            "marb": "Marambio",
-            "davs": "Davis",
-            "mirn": "Mirny",
-            "myth": "Maitri",
-        }
-        self.station = station
-        self.height = height
-        self.filename = "%s/%s.%s.nc" % (tdir, station, height)
-        self.traj = HyData(self.filename).load()
+        self.data = data
         self.m = projection
-        if station_name is not None:
-            self.station_name = station_name
-        else:
-            self.station_name = name[station]
+        self.time = data.time.to_pandas()
 
-    def get_projected_trajectory(self, traj):
-        mlat = []
-        mlon = []
-        for i, col in enumerate(traj["lat"].columns):
-            latx = traj["lat"].iloc[:, i].values
-            lonx = traj["lon"].iloc[:, i].values
-            lonx, latx = self.m(lonx, latx)
-            mlat.append(latx)
-            mlon.append(lonx)
-        mlat = pd.DataFrame(np.array(mlat).T, columns=traj["lat"].columns)
-        mlon = pd.DataFrame(np.array(mlon).T, columns=traj["lat"].columns)
-        return mlat, mlon
-
-    def get_wavelet_feature(self, scale=True):
-        ff = []
-        cols = [
+    def fit(self, scale=True):
+        ln, lt = self.m(
+            self.data.sel(geo="lon").values, self.data.sel(geo="lat").values
+        )
+        ff = pd.concat([self._wavelet_features(lt), self._wavelet_features(ln)])
+        ff.index = [
             "latmin",
             "lat25",
             "lat50",
@@ -67,29 +43,22 @@ class TrajMining:
             "lon75",
             "lonmax",
         ]
-        mlat, mlon = self.get_projected_trajectory(traj=self.traj)
-        lat = mlat.T.values
-        lon = mlon.T.values
-
-        def wavelet_feature(lat):
-            ca = pd.Series(pywt.dwt(lat, "haar")[0]).describe().values[3:]
-            return ca
-
-        for num in np.arange(lat.shape[0]):
-            ca = wavelet_feature(lat[num, :])
-            cb = wavelet_feature(lon[num, :])
-            cc = np.hstack((ca, cb))
-            ff.append(cc)
-        ff = pd.DataFrame(ff, index=mlat.columns, columns=cols)
-        ff[ff.abs() >= 1e8] = np.nan
         if scale:
             ff = (ff - ff.min()) / (ff.max() - ff.min())
-        return ff
+        return ff.T
 
+    def _wavelet_features(self, data):
+        wv = pywt.dwt(data.T, "haar")[0]
+        wv = pd.DataFrame(wv, self.time).T.describe().iloc[3:]
+        return wv
 
 class Trajclustering:
     def __init__(self, data):
         self.traj = data
+
+    def fit(self, kmax=50, pyclus=False):
+        n, wce, labels = self.get_kmeans_cluster(kmax, plot=False, pyclus=pyclus)
+        return labels
 
     def _elbow_method(self, kmax=50):
         wce = []
@@ -128,17 +97,16 @@ class Trajclustering:
         self.wce = wce
         if plot:
             self._plot_elbow_score(n, wce)
-            sns.distplot(labels, kde=False)
-            plt.show()
         return n, wce, labels
 
     def _plot_elbow_score(self, n, wce):
         nums = np.arange(1, len(wce) + 1)
         fig, ax = plt.subplots(1, 1, figsize=(14, 5))
-        ax.plot(nums, wce)
-        ax.scatter(n, wce[n - 1], color="red", marker="*")
+        ax.plot(nums, wce, color="m")
+        ax.scatter(n, wce[n - 1], color="red", marker=".", s=200)
+        ax.axvline(n, ls="-.", color="k")
         ax.minorticks_on()
         ax.set_xlabel("Number of clusters")
         ax.set_ylabel("Within cluster Error")
-        ax.set_title("Optimal number of clsters = %s" % n, y=0.9)
+        ax.set_title("Optimal number of clusters = %s" % n)
         plt.show()
