@@ -7,6 +7,11 @@ This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hy
 ### Install using pip:
 
 ```bash
+pip install hytraj
+```
+or
+
+```bash
 pip install git+https://github.com/pankajkarman/HyTraj.git
 ```
 ### To install from source, first clone this repo and install using:
@@ -105,7 +110,7 @@ model.plot_map(rtwc, boundinglat=-25)
     - Potential Source Contribution Function (PSCF) 
     - Residence Time Weighted Concentration (RTWC)
 
-## To do
+## To Do
 
 1. **GUI:** Medium-term goal 
 
