@@ -17,8 +17,7 @@ class HyCluster:
         feat = HyWave(self.data).fit(scale=False)
         labels = Trajclustering(feat).fit(kmax=kmax, pyclus=pyclus)
         return labels
-
-
+        
 class HyWave:
     def __init__(
         self, data, projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30)

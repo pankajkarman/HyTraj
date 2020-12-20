@@ -21,6 +21,12 @@ make install
 make conda
 ```
 
+#### Dependencies
+
+1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap) which has to be installed manually by the user. 
+
+2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist) which has to be installed manually by the user.
+
 ## Usage
 
 See [this notebook](example3.ipynb) for example usecase.
@@ -45,14 +51,26 @@ hy.plot(data["Neumayer"], vertical="alt", show=True)
 
 ### Cluster Trajectories
 
+#### KMeans Clustering using wavelet features
+
 ```python
 from hytraj import HyCluster
 
 labels = HyCluster(data).fit(kmax=10, method='KMeans')
-
 ```
 
-### Perform Receptor Modeling
+#### Hierarchical Agglomerative Clustering (HAC)
+
+```python
+from hytraj import HyHAC
+
+trj = HyHAC(data)
+labels = trj.fit(nclus=4, metric='sspd')
+trj.plot_dendrogram()
+```
+![Dendrogram](dendrogram.png)
+
+### Receptor Modeling
 
 ```python
 from hytraj import HyReceptor, HyData
@@ -64,8 +82,6 @@ cwt = model.calculate_cwt(weighted=False)
 pscf = model.calculate_pscf(thresh=0.95)
 rtwc = model.calculate_rtwc(normalise=True)
 model.plot_map(rtwc, boundinglat=-25)
-
-
 ```
 
 ## Features
@@ -81,6 +97,8 @@ model.plot_map(rtwc, boundinglat=-25)
 5. **[HyData](./hytraj/hyread.py):** Reading and binning trajectories data (NetCDF with xarray support).
 
 6. **[HyCluster](./hytraj/hycluster.py):** Clustering of trajectories with KMeans using wavelet features.
+
+7. **[HyHAC](./hytraj/hyagg.py):** Clustering of trajectories with Hierarchical Agglomerative Clustering (HAC) using various trajectory distance metric like [DTW, EDR, LCSS, SSPD, Frechet Distance, Hausdorf Distance](https://ieeexplore.ieee.org/document/7464920).
 
 6. **[HyReceptor](./hytraj/hymodel.py):** [Single site Receptor Modeling](https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub) ( both [weighted](https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub) and unweighted):
     - Concentration weighted Trajectory (CWT)

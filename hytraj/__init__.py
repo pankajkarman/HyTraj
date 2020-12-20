@@ -10,6 +10,8 @@ from .hygen import HyGen, HyControl, HyParallel
 from .hyread import HyData
 from .hymodel import HyReceptor
 from .hycluster import HyCluster
+from .hyagg import HyHAC
+from .hyplot import ClusterPlot
 
 
 class HyTraj:
