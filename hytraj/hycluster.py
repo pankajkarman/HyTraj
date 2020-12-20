@@ -1,4 +1,3 @@
-
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
 import glob, pywt, pyclustering
 from mpl_toolkits.basemap import Basemap
@@ -9,6 +8,7 @@ from pyclustering.cluster.elbow import elbow
 
 import xarray as xr
 
+
 class HyCluster:
     def __init__(self, data):
         self.data = data
@@ -17,6 +17,7 @@ class HyCluster:
         feat = HyWave(self.data).fit(scale=False)
         labels = Trajclustering(feat).fit(kmax=kmax, pyclus=pyclus)
         return labels
+
 
 class HyWave:
     def __init__(
@@ -51,6 +52,7 @@ class HyWave:
         wv = pywt.dwt(data.T, "haar")[0]
         wv = pd.DataFrame(wv, self.time).T.describe().iloc[3:]
         return wv
+
 
 class Trajclustering:
     def __init__(self, data):

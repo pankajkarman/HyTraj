@@ -3,4 +3,5 @@ pandas
 xarray
 matplotlib
 sklearn
-
+PyWavelets
+pyclustering
