@@ -112,9 +112,11 @@ model.plot_map(rtwc, boundinglat=-25)
 
 ## To Do
 
-1. **GUI:** Medium-term goal 
+1. Support for more meteorology like **ERA5**.
 
-2. **Bayesian Inversion:** long-term goal
+2. **GUI:** Medium-term goal 
+
+3. **Bayesian Inversion:** long-term goal
 
 
 **PS:** Find **pre-built HYSPLIT executable** at [this link](https://github.com/rich-iannone/splitr/tree/master/extras/) and copy **executeble** to working directory.
