@@ -47,10 +47,15 @@ class HyGen(object):
                 + "."
                 + self.get_out_date(date)
             )
-            if self.met_type == "ncep":
-                metfiles = self.get_ncep_metfiles(date)
-            else:
+            if self.met_type == "ncep_old":
+                metfiles = self.get_old_ncep_metfiles(date)
+
+            if self.met_type == "ncep_new":
+                metfiles = self.get_new_ncep_metfiles(date)
+
+            if self.met_type == "gdas_1":
                 metfiles = self.get_gdas_metfiles(date)
+                
             metfiles = [self.metdir + filename for filename in metfiles]
             self.create_control_file(
                 start_time, metfiles, outfile, vertical=vertical, model_top=model_top
@@ -81,7 +86,21 @@ class HyGen(object):
             raus.write(file + "\n")  # 11
 
     @staticmethod
-    def get_ncep_metfiles(date):
+    def get_new_ncep_metfiles(date):
+        curr = "RP%s%02d.gbl" % (date.year, date.month)
+        if not date.month == 12:
+            next = "RP%s%02d.gbl" % (date.year, date.month + 1)
+        else:
+            next = "RP%s%02d.gbl" % (date.year + 1, date.month - 11)
+
+        if not date.month == 1:
+            prev = "RP%s%02d.gbl" % (date.year, date.month - 1)
+        else:
+            prev = "RP%s%02d.gbl" % (date.year - 1, date.month - 1 + 12)
+        return [curr, prev, next]
+
+    @staticmethod
+    def get_old_ncep_metfiles(date):
         mons = [
             "jan",
             "feb",
@@ -179,9 +198,13 @@ class HyControl(HyGen):
                 + "."
                 + self.get_out_date(date)
             )
-            if self.met_type == "ncep":
-                metfiles = self.get_ncep_metfiles(date)
-            else:
+            if self.met_type == "ncep_old":
+                metfiles = self.get_old_ncep_metfiles(date)
+
+            if self.met_type == "ncep_new":
+                metfiles = self.get_new_ncep_metfiles(date)
+
+            if self.met_type == "gdas_1":
                 metfiles = self.get_gdas_metfiles(date)
             metfiles = [self.metdir + filename for filename in metfiles]
             self.create_control_file(
@@ -207,6 +230,9 @@ class HyParallel:
     def run(self):
         files = glob.glob(self.working + "/*")
         files = [os.path.abspath(filename) for filename in files]
+        exe = [filename for filename in files if "hyts" in filename]
+        if len(exe) == 0:
+            print("HySPLIT Executable (hyts_std) is missing. Put executable in the working directory")
         if not os.path.exists(self.temp_folder):
             os.mkdir(os.path.abspath(self.temp_folder))
 
@@ -223,6 +249,8 @@ class HyParallel:
             shutil.rmtree(self.temp_folder)
         except:
             shutil.rmtree(self.temp_folder)
+            pass
+            
 
         print("HySPLIT run over!!!!")
 
