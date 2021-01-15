@@ -44,23 +44,26 @@ class ClusterPlot:
     def get_representative_trajectories(self):
         labels = self.cluster.values[0]
         columns = self.cluster.columns
+        kcount = []
         clusters = ["CLUS_" + str(i + 1) for i in np.arange(self.nclus)]
         self.rep_traj_lat = pd.DataFrame(columns=clusters)
         self.rep_traj_lon = pd.DataFrame(columns=clusters)
         for num, cluster in enumerate(clusters):
             col = columns[labels == num]
+            kcount.append(len(col))
             lats, lons = mean_trajectory(self.lat[col], self.lon[col])
             self.rep_traj_lat[cluster], self.rep_traj_lon[cluster] = (lats, lons)
-        return self.rep_traj_lat, self.rep_traj_lon
+        return self.rep_traj_lat, self.rep_traj_lon, kcount
 
     def plot_representative_trajectories(self, ax=None, cmap=plt.cm.jet, lw=3, s=200):
         m = self.m
         xx, yy = m(self.slon, self.slat)
         m.scatter(xx, yy, color="r", s=s)
 
-        lat1, lon1 = self.get_representative_trajectories()
+        lat1, lon1, kcount = self.get_representative_trajectories()
         colors = [cmap(i) for i in np.linspace(0, 1, self.nclus)]
         for count, tr in enumerate(lat1.columns):
+            lwd = lw*kcount[count]/np.sum(kcount)
             xx, yy = m(lon1[tr].values, lat1[tr].values)
-            m.plot(xx, yy, color=colors[count], lw=lw)
+            m.plot(xx, yy, color=colors[count], lw=lwd)
         return ax

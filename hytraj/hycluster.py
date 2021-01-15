@@ -10,13 +10,22 @@ import xarray as xr
 
 
 class HyCluster:
-    def __init__(self, data):
+    def __init__(self, data, projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30), scale=False):
         self.data = data
+        self.projection = projection
+        self.scale = scale
+        self.feat = HyWave(data, projection=projection).fit(scale=scale)
 
-    def fit(self, kmax=50, method="KMeans", pyclus=True):
-        feat = HyWave(self.data).fit(scale=False)
-        labels = Trajclustering(feat).fit(kmax=kmax, pyclus=pyclus)
-        return labels
+    def fit(self, kmax=50, method="KMeans", pyclus=True, scale=False):
+        labels = Trajclustering(self.feat).fit(kmax=kmax, pyclus=pyclus)
+        self.labels = pd.DataFrame(labels).T
+        return self.labels
+        
+    def get_kmeans_cluster(self, n_clusters=4):
+        kmeans = KMeans(n_clusters=n_clusters, random_state=0).fit(self.feat)
+        labels = pd.Series(kmeans.labels_, index=self.feat.index)
+        self.labels = pd.DataFrame(labels).T
+        return self.labels
         
 class HyWave:
     def __init__(
