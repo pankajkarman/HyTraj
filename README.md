@@ -1,6 +1,6 @@
 # HyTraj
 
-This python library implements [**HYSPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
+This python library implements [**HySPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
 
 ## Installation
 
@@ -14,23 +14,12 @@ or
 ```bash
 pip install git+https://github.com/pankajkarman/HyTraj.git
 ```
-### To install from source, first clone this repo and install using:
-
-```bash
-make install
-```
-
-### Install in a conda virtual environment:
-
-```bash
-make conda
-```
 
 #### Dependencies
 
-1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap) which has to be installed manually by the user. 
+1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap).
 
-2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist) which has to be installed manually by the user.
+2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist).
 
 ## Usage
 
@@ -113,10 +102,7 @@ model.plot_map(rtwc, boundinglat=-25)
 ## To Do
 
 1. Support for more meteorology like **ERA5**.
-
-2. **GUI:** Medium-term goal 
-
-3. **Bayesian Inversion:** long-term goal
-
+2. Add documentation.
+3. **GUI:** Medium-term goal 
 
 **PS:** Find **pre-built HYSPLIT executable** at [this link](https://github.com/rich-iannone/splitr/tree/master/extras/) and copy **executeble** to working directory.
