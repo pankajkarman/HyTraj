@@ -15,6 +15,11 @@ help:
 develop:
 	python setup.py develop
 	
+doc:
+	pdoc -f --html $(PROJECT_DIR) --output-dir docs
+	mv ./docs/$(PROJECT_DIR)/* ./docs
+	rm -rf ./docs/$(PROJECT_DIR)
+	
 install:
 	python setup.py install
 
