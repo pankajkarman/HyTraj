@@ -21,6 +21,10 @@ pip install git+https://github.com/pankajkarman/HyTraj.git
 
 2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist).
 
+## Documentation
+
+Latest documentation is available [here](https://pankajkarman.github.io/HyTraj/).
+
 ## Usage
 
 See [this notebook](example3.ipynb) for example usecase.
