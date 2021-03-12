@@ -1,5 +1,5 @@
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
-import traj_dist.distance as tdist
+#import traj_dist.distance as tdist
 import fastcluster as fc, scipy.cluster.hierarchy as sch
 
 class HyHAC:

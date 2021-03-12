@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.9.2" />
 <title>hytraj API documentation</title>
-<meta name="description" content="" />
+<meta name="description" content="HyTraj …" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
 <link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
@@ -22,11 +22,224 @@
 <h1 class="title">Package <code>hytraj</code></h1>
 </header>
 <section id="section-intro">
+<h1 id="hytraj">HyTraj</h1>
+<p>This python library implements <a href="https://www.arl.noaa.gov/hysplit/hysplit/"><strong>HySPLIT</strong></a> based trajectory modeling and analysis. </p>
+<h2 id="installation">Installation</h2>
+<h3 id="install-using-pip">Install using pip:</h3>
+<pre><code class="language-bash">pip install hytraj
+</code></pre>
+<p>or</p>
+<pre><code class="language-bash">pip install git+https://github.com/pankajkarman/HyTraj.git
+</code></pre>
+<h4 id="dependencies">Dependencies</h4>
+<ol>
+<li>
+<p>Plotting requires <a href="https://anaconda.org/anaconda/basemap">Basemap</a>.</p>
+</li>
+<li>
+<p>Hierarchical clustering requires <a href="https://github.com/djjavo/traj-dist/tree/master/traj_dist">traj_dist</a>.</p>
+</li>
+</ol>
+<h2 id="documentation">Documentation</h2>
+<p>Latest documentation is available <a href="https://pankajkarman.github.io/HyTraj/">here</a>.</p>
+<h2 id="usage">Usage</h2>
+<p>See <a href="example3.ipynb">this notebook</a> for example usecase.</p>
+<pre><code class="language-python">
+import hytraj as ht
+</code></pre>
+<h3 id="generate-trajectories">Generate Trajectories</h3>
+<pre><code class="language-python">from hytraj import HyTraj
+
+met_type = &quot;ncep&quot;
+dates = pd.date_range(&quot;2010-02-01&quot;, freq=&quot;24H&quot;, end=&quot;2010-02-10&quot;)
+hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
+data = hy.run(dates, njobs=7)
+hy.plot(data[&quot;Neumayer&quot;], vertical=&quot;alt&quot;, show=True)
+</code></pre>
+<p><img alt="Example Trajectories" src="ex.png"></p>
+<h3 id="cluster-trajectories">Cluster Trajectories</h3>
+<h4 id="kmeans-clustering-using-wavelet-features">KMeans Clustering using wavelet features</h4>
+<pre><code class="language-python">from hytraj import HyCluster
+
+labels = HyCluster(data).fit(kmax=10, method='KMeans')
+</code></pre>
+<h4 id="hierarchical-agglomerative-clustering-hac">Hierarchical Agglomerative Clustering (HAC)</h4>
+<pre><code class="language-python">from hytraj import HyHAC
+
+trj = HyHAC(data)
+labels = trj.fit(nclus=4, metric='sspd')
+trj.plot_dendrogram()
+</code></pre>
+<p><img alt="Dendrogram" src="dendrogram.png"></p>
+<h3 id="receptor-modeling">Receptor Modeling</h3>
+<pre><code class="language-python">from hytraj import HyReceptor, HyData
+
+station = 'South Pole'
+data = HyData(files, stations).read()[station]
+model = HyReceptor(ozone, data, station_name=&quot;South Pole&quot;)
+cwt = model.calculate_cwt(weighted=False)
+pscf = model.calculate_pscf(thresh=0.95)
+rtwc = model.calculate_rtwc(normalise=True)
+model.plot_map(rtwc, boundinglat=-25)
+</code></pre>
+<h2 id="features">Features</h2>
+<ol>
+<li>
+<p><strong><a href="./hytraj/__init__.py">HyTraj</a>:</strong> Higher level implementation of <strong>Parallel Generation, reading and plotting</strong> of Trajectories (<strong>Recommended</strong>).</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hygen.py">HyGen</a>:</strong> Generation of Trajectories using various meteo datasets (<strong><a href="https://ready.arl.noaa.gov/archives.php">NCEP and GDAS implemented</a></strong>).</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hygen.py">HyControl</a>:</strong> Generation of control files for parallel trajectory generation afterwards. </p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hygen.py">HyParallel</a>:</strong> Parallel generation of trajectories using control files produced using <strong>HyControl</strong>.</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hyread.py">HyData</a>:</strong> Reading and binning trajectories data (NetCDF with xarray support).</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hycluster.py">HyCluster</a>:</strong> Clustering of trajectories with KMeans using wavelet features.</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hyagg.py">HyHAC</a>:</strong> Clustering of trajectories with Hierarchical Agglomerative Clustering (HAC) using various trajectory distance metric like <a href="https://ieeexplore.ieee.org/document/7464920">DTW, EDR, LCSS, SSPD, Frechet Distance, Hausdorf Distance</a>.</p>
+</li>
+<li>
+<p><strong><a href="./hytraj/hymodel.py">HyReceptor</a>:</strong> <a href="https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub">Single site Receptor Modeling</a> ( both <a href="https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub">weighted</a> and unweighted):</p>
+<ul>
+<li>Concentration weighted Trajectory (CWT)</li>
+<li>Potential Source Contribution Function (PSCF) </li>
+<li>Residence Time Weighted Concentration (RTWC)</li>
+</ul>
+</li>
+</ol>
+<h2 id="to-do">To Do</h2>
+<ol>
+<li>Support for more meteorology like <strong>ERA5</strong>.</li>
+<li>Add documentation.</li>
+<li><strong>GUI:</strong> Medium-term goal</li>
+</ol>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">import os, glob
+<pre><code class="python">r&#34;&#34;&#34;
+# HyTraj
+
+This python library implements [**HySPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
+
+## Installation
+
+### Install using pip:
+
+```bash
+pip install hytraj
+```
+or
+
+```bash
+pip install git+https://github.com/pankajkarman/HyTraj.git
+```
+
+#### Dependencies
+
+1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap).
+
+2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist).
+
+## Documentation
+
+Latest documentation is available [here](https://pankajkarman.github.io/HyTraj/).
+
+## Usage
+
+See [this notebook](example3.ipynb) for example usecase.
+
+```python
+
+import hytraj as ht
+```
+
+### Generate Trajectories
+
+```python
+from hytraj import HyTraj
+
+met_type = &#34;ncep&#34;
+dates = pd.date_range(&#34;2010-02-01&#34;, freq=&#34;24H&#34;, end=&#34;2010-02-10&#34;)
+hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
+data = hy.run(dates, njobs=7)
+hy.plot(data[&#34;Neumayer&#34;], vertical=&#34;alt&#34;, show=True)
+```
+![Example Trajectories](ex.png)
+
+### Cluster Trajectories
+
+#### KMeans Clustering using wavelet features
+
+```python
+from hytraj import HyCluster
+
+labels = HyCluster(data).fit(kmax=10, method=&#39;KMeans&#39;)
+```
+
+#### Hierarchical Agglomerative Clustering (HAC)
+
+```python
+from hytraj import HyHAC
+
+trj = HyHAC(data)
+labels = trj.fit(nclus=4, metric=&#39;sspd&#39;)
+trj.plot_dendrogram()
+```
+![Dendrogram](dendrogram.png)
+
+### Receptor Modeling
+
+```python
+from hytraj import HyReceptor, HyData
+
+station = &#39;South Pole&#39;
+data = HyData(files, stations).read()[station]
+model = HyReceptor(ozone, data, station_name=&#34;South Pole&#34;)
+cwt = model.calculate_cwt(weighted=False)
+pscf = model.calculate_pscf(thresh=0.95)
+rtwc = model.calculate_rtwc(normalise=True)
+model.plot_map(rtwc, boundinglat=-25)
+```
+
+## Features
+
+1. **[HyTraj](./hytraj/__init__.py):** Higher level implementation of **Parallel Generation, reading and plotting** of Trajectories (**Recommended**).
+
+2. **[HyGen](./hytraj/hygen.py):** Generation of Trajectories using various meteo datasets (**[NCEP and GDAS implemented](https://ready.arl.noaa.gov/archives.php)**).
+
+3. **[HyControl](./hytraj/hygen.py):** Generation of control files for parallel trajectory generation afterwards. 
+
+4. **[HyParallel](./hytraj/hygen.py):** Parallel generation of trajectories using control files produced using **HyControl**.
+
+5. **[HyData](./hytraj/hyread.py):** Reading and binning trajectories data (NetCDF with xarray support).
+
+6. **[HyCluster](./hytraj/hycluster.py):** Clustering of trajectories with KMeans using wavelet features.
+
+7. **[HyHAC](./hytraj/hyagg.py):** Clustering of trajectories with Hierarchical Agglomerative Clustering (HAC) using various trajectory distance metric like [DTW, EDR, LCSS, SSPD, Frechet Distance, Hausdorf Distance](https://ieeexplore.ieee.org/document/7464920).
+
+6. **[HyReceptor](./hytraj/hymodel.py):** [Single site Receptor Modeling](https://www.sciencedirect.com/science/article/abs/pii/S1352231002008865?via%3Dihub) ( both [weighted](https://www.sciencedirect.com/science/article/abs/pii/S1352231017303898?via%3Dihub) and unweighted):
+    - Concentration weighted Trajectory (CWT)
+    - Potential Source Contribution Function (PSCF) 
+    - Residence Time Weighted Concentration (RTWC)
+
+## To Do
+
+1. Support for more meteorology like **ERA5**.
+2. Add documentation.
+3. **GUI:** Medium-term goal 
+
+&#34;&#34;&#34;
+
+
+import os, glob
 import pandas as pd, numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -335,7 +548,31 @@ def plot(
 <nav id="sidebar">
 <h1>Index</h1>
 <div class="toc">
-<ul></ul>
+<ul>
+<li><a href="#hytraj">HyTraj</a><ul>
+<li><a href="#installation">Installation</a><ul>
+<li><a href="#install-using-pip">Install using pip:</a><ul>
+<li><a href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#documentation">Documentation</a></li>
+<li><a href="#usage">Usage</a><ul>
+<li><a href="#generate-trajectories">Generate Trajectories</a></li>
+<li><a href="#cluster-trajectories">Cluster Trajectories</a><ul>
+<li><a href="#kmeans-clustering-using-wavelet-features">KMeans Clustering using wavelet features</a></li>
+<li><a href="#hierarchical-agglomerative-clustering-hac">Hierarchical Agglomerative Clustering (HAC)</a></li>
+</ul>
+</li>
+<li><a href="#receptor-modeling">Receptor Modeling</a></li>
+</ul>
+</li>
+<li><a href="#features">Features</a></li>
+<li><a href="#to-do">To Do</a></li>
+</ul>
+</li>
+</ul>
 </div>
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>

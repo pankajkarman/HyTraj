@@ -1,3 +1,77 @@
+"""
+This python library implements [**HySPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
+
+## Installation
+
+### Install using pip:
+
+```bash
+pip install hytraj
+```
+or
+
+```bash
+pip install git+https://github.com/pankajkarman/HyTraj.git
+```
+
+## Dependencies
+
+1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap).
+
+2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist).
+
+## Usage
+
+```python
+import hytraj as ht
+```
+
+### Generate Trajectories
+
+```python
+from hytraj import HyTraj
+
+met_type = "ncep"
+dates = pd.date_range("2010-02-01", freq="24H", end="2010-02-10")
+hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
+data = hy.run(dates, njobs=7)
+hy.plot(data["Neumayer"], vertical="alt", show=True)
+```
+### Cluster Trajectories
+
+#### KMeans Clustering using wavelet features
+
+```python
+from hytraj import HyCluster
+
+labels = HyCluster(data).fit(kmax=10, method='KMeans')
+```
+
+#### Hierarchical Agglomerative Clustering (HAC)
+
+```python
+from hytraj import HyHAC
+
+trj = HyHAC(data)
+labels = trj.fit(nclus=4, metric='sspd')
+trj.plot_dendrogram()
+```
+### Receptor Modeling
+
+```python
+from hytraj import HyReceptor, HyData
+
+station = 'South Pole'
+data = HyData(files, stations).read()[station]
+model = HyReceptor(ozone, data, station_name="South Pole")
+cwt = model.calculate_cwt(weighted=False)
+pscf = model.calculate_pscf(thresh=0.95)
+rtwc = model.calculate_rtwc(normalise=True)
+model.plot_map(rtwc, boundinglat=-25)
+```
+"""
+
+
 import os, glob
 import pandas as pd, numpy as np
 import matplotlib.pyplot as plt
