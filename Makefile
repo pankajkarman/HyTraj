@@ -20,6 +20,9 @@ doc:
 	mv ./docs/$(PROJECT_DIR)/* ./docs
 	rm -rf ./docs/$(PROJECT_DIR)
 	
+server:
+	pdoc --http : $(PROJECT_DIR)
+	
 install:
 	python setup.py install
 
