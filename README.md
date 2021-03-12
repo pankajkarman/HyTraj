@@ -27,7 +27,7 @@ Latest documentation is available [here](https://pankajkarman.github.io/HyTraj/)
 
 ## Usage
 
-See [this notebook](example3.ipynb) for example usecase.
+See [this notebook](./example/example3.ipynb) for example usecase.
 
 ```python
 
@@ -45,7 +45,7 @@ hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
 data = hy.run(dates, njobs=7)
 hy.plot(data["Neumayer"], vertical="alt", show=True)
 ```
-![Example Trajectories](ex.png)
+![Example Trajectories](./example/ex.png)
 
 ### Cluster Trajectories
 
@@ -66,7 +66,7 @@ trj = HyHAC(data)
 labels = trj.fit(nclus=4, metric='sspd')
 trj.plot_dendrogram()
 ```
-![Dendrogram](dendrogram.png)
+![Dendrogram](./example/dendrogram.png)
 
 ### Receptor Modeling
 
