@@ -71,18 +71,19 @@ coverage: test
 	diff-cover coverage.xml --compare-branch=main --fail-under=100
 
 pypi:
-	${PYTHON} setup.py clean --all; \
-	${PYTHON} setup.py rotate --match=.tar.gz,.whl,.egg,.zip --keep=0; \
-	${PYTHON} setup.py sdist bdist_wheel; \
-  twine upload --skip-existing dist/*;
+	${PYTHON} setup.py clean --all
+	${PYTHON} setup.py rotate --match=.tar.gz,.whl,.egg,.zip --keep=0
+	${PYTHON} setup.py sdist bdist_wheel
+	twine upload --skip-existing dist/*
 
 lint: format style  # Lint code using pydocstyle, black and pylint.
 
 check: lint test coverage  # Both lint and test code. Runs `make lint` followed by `make test`.
 
 clean: 
-	     rm -rf ./build 
-	     rm -rf ./dist 
-	     rm -rf ./*-venv
-	     rm -rf ./*egg* 
-	     rm -rf ./hytraj/__pycache__
+	rm -rf ./build 
+	rm -rf ./dist 
+	rm -rf ./*-venv
+	rm -rf ./*egg* 
+	rm -rf ./__pycache__
+	rm -rf ./hytraj/__pycache__
