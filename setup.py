@@ -9,7 +9,7 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 setup(
      name='hytraj',
-     version='0.1.1',
+     version='0.1.2',
      description='Implementation of HySPLIT based trajectory modeling and analysis in python',
      long_description=long_description,
      long_description_content_type='text/markdown',
