@@ -6,7 +6,6 @@ import xarray as xr
 from mpl_toolkits.basemap import Basemap, addcyclic, cm
 
 
-
 def mean_trajectory(latitudes, longitudes):
     """ Get the centroid of parcels at each timestep. """
     x = np.cos(np.radians(latitudes)) * np.cos(np.radians(longitudes))
@@ -63,7 +62,7 @@ class ClusterPlot:
         lat1, lon1, kcount = self.get_representative_trajectories()
         colors = [cmap(i) for i in np.linspace(0, 1, self.nclus)]
         for count, tr in enumerate(lat1.columns):
-            lwd = lw*kcount[count]/np.sum(kcount)
+            lwd = lw * kcount[count] / np.sum(kcount)
             xx, yy = m(lon1[tr].values, lat1[tr].values)
             m.plot(xx, yy, color=colors[count], lw=lwd)
         return ax

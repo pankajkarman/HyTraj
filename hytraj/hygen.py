@@ -55,7 +55,7 @@ class HyGen(object):
 
             if self.met_type == "gdas_1":
                 metfiles = self.get_gdas_metfiles(date)
-                
+
             metfiles = [self.metdir + filename for filename in metfiles]
             self.create_control_file(
                 start_time, metfiles, outfile, vertical=vertical, model_top=model_top
@@ -232,7 +232,9 @@ class HyParallel:
         files = [os.path.abspath(filename) for filename in files]
         exe = [filename for filename in files if "hyts" in filename]
         if len(exe) == 0:
-            print("HySPLIT Executable (hyts_std) is missing. Put executable in the working directory")
+            print(
+                "HySPLIT Executable (hyts_std) is missing. Put executable in the working directory"
+            )
         if not os.path.exists(self.temp_folder):
             os.mkdir(os.path.abspath(self.temp_folder))
 
@@ -250,7 +252,6 @@ class HyParallel:
         except:
             shutil.rmtree(self.temp_folder)
             pass
-            
 
         print("HySPLIT run over!!!!")
 

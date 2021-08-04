@@ -2,6 +2,7 @@ import pandas as pd, numpy as np, matplotlib.pyplot as plt
 import traj_dist.distance as tdist
 import fastcluster as fc, scipy.cluster.hierarchy as sch
 
+
 class HyHAC:
     def __init__(self, data):
         self.lat = data.sel(geo="lat").to_pandas()
@@ -21,7 +22,7 @@ class HyHAC:
         self.link = fc.linkage(self.p_dist, method=method)
         return self
 
-    def fit(self, nclus=5, metric='sspd', method="ward", type_d="spherical"):
+    def fit(self, nclus=5, metric="sspd", method="ward", type_d="spherical"):
         self.nclus = nclus
         self.get_linkage(metric, method, type_d)
         self.labels = sch.fcluster(self.link, self.nclus, criterion="maxclust") - 1
