@@ -1,3 +1,11 @@
+_________________
+
+[![PyPI version](https://badge.fury.io/py/hytraj.svg)](http://badge.fury.io/py/hytraj)
+[![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://pypi.python.org/pypi/hytraj/)
+[![Downloads](https://pepy.tech/badge/hytraj)](https://pepy.tech/project/hytraj)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+_________________
+
 # HyTraj
 
 This python library implements [**HySPLIT**](https://www.arl.noaa.gov/hysplit/hysplit/) based trajectory modeling and analysis. 
