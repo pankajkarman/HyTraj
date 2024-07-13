@@ -3,7 +3,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-from mpl_toolkits.basemap import Basemap, addcyclic, cm
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 
 def mean_trajectory(latitudes, longitudes):
@@ -28,8 +29,7 @@ class ClusterPlot:
     def __init__(
         self,
         data,
-        cluster,
-        proj=Basemap(projection="spstere", lon_0=180, boundinglat=-30),
+        cluster
     ):
         self.lat = data.sel(geo="lat").to_pandas()
         self.lon = data.sel(geo="lon").to_pandas()
@@ -38,7 +38,6 @@ class ClusterPlot:
         self.slon = self.lon.iloc[0, 0]
         self.cluster = cluster
         self.nclus = cluster.T.nunique().values[0]
-        self.m = proj
 
     def get_representative_trajectories(self):
         labels = self.cluster.values[0]
@@ -55,14 +54,15 @@ class ClusterPlot:
         return self.rep_traj_lat, self.rep_traj_lon, kcount
 
     def plot_representative_trajectories(self, ax=None, cmap=plt.cm.jet, lw=3, s=200):
-        m = self.m
-        xx, yy = m(self.slon, self.slat)
-        m.scatter(xx, yy, color="r", s=s)
+        xx, yy = (self.slon, self.slat)
+        ax.scatter(xx, yy, color="r", s=s, transform=ccrs.PlateCarree())
 
         lat1, lon1, kcount = self.get_representative_trajectories()
         colors = [cmap(i) for i in np.linspace(0, 1, self.nclus)]
         for count, tr in enumerate(lat1.columns):
             lwd = lw * kcount[count] / np.sum(kcount)
-            xx, yy = m(lon1[tr].values, lat1[tr].values)
-            m.plot(xx, yy, color=colors[count], lw=lwd)
+            xx, yy = (lon1[tr].values, lat1[tr].values)
+            ax.plot(xx, yy, color=colors[count], lw=lwd, transform=ccrs.PlateCarree())
+        ax.add_feature(cfeature.LAND, color="lightgrey", alpha=0.5)
+        ax.add_feature(cfeature.OCEAN, color="skyblue", alpha=0.4)
         return ax

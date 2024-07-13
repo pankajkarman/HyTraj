@@ -261,4 +261,4 @@ class HyParallel:
         os.chdir(fold)
         for filename in nfiles:
             shutil.copy2(filename, fold + "/CONTROL")
-            subprocess.call("./hyts_std")
+            log = subprocess.call("./hyts_std")

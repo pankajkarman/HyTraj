@@ -25,13 +25,13 @@ pip install git+https://github.com/pankajkarman/HyTraj.git
 
 #### Dependencies
 
-1. Plotting requires [Basemap](https://anaconda.org/anaconda/basemap).
+1. Plotting requires [cartopy](https://anaconda.org/anaconda/cartopy).
 
 2. Hierarchical clustering requires [traj_dist](https://github.com/djjavo/traj-dist/tree/master/traj_dist).
 
 ## Documentation
 
-Latest documentation is available [here](https://pankajkarman.github.io/HyTraj/).
+Latest documentation is available [here](https://pankajkarman.github.io/HyTraj/). Improved documentation will come up shortly.
 
 ## Usage
 
@@ -47,8 +47,8 @@ import hytraj as ht
 ```python
 from hytraj import HyTraj
 
-met_type = "ncep"
-dates = pd.date_range("2010-02-01", freq="24H", end="2010-02-10")
+met_type = "ncep_new"
+dates = pd.date_range("2010-02-01", freq="24h", end="2010-02-10")
 hy = HyTraj(stations, height, run_time, working, metdir, outdir, met_type)
 data = hy.run(dates, njobs=7)
 hy.plot(data["Neumayer"], vertical="alt", show=True)
@@ -87,7 +87,7 @@ model = HyReceptor(ozone, data, station_name="South Pole")
 cwt = model.calculate_cwt(weighted=False)
 pscf = model.calculate_pscf(thresh=0.95)
 rtwc = model.calculate_rtwc(normalise=True)
-model.plot_map(rtwc, boundinglat=-25)
+model.plot_map(rtwc, boundinglats=[-55, -90])
 ```
 
 ## Features

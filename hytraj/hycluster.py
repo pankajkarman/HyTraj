@@ -1,6 +1,5 @@
 import pandas as pd, numpy as np, matplotlib.pyplot as plt
 import glob, pywt, pyclustering
-from mpl_toolkits.basemap import Basemap
 
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
@@ -13,13 +12,11 @@ class HyCluster:
     def __init__(
         self,
         data,
-        projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30),
         scale=False,
     ):
         self.data = data
-        self.projection = projection
         self.scale = scale
-        self.feat = HyWave(data, projection=projection).fit(scale=scale)
+        self.feat = HyWave(data).fit(scale=scale)
 
     def fit(self, kmax=50, method="KMeans", pyclus=True, scale=False):
         labels = Trajclustering(self.feat).fit(kmax=kmax, pyclus=pyclus)
@@ -35,14 +32,13 @@ class HyCluster:
 
 class HyWave:
     def __init__(
-        self, data, projection=Basemap(projection="spstere", lon_0=180, boundinglat=-30)
+        self, data
     ):
         self.data = data
-        self.m = projection
         self.time = data.time.to_pandas()
 
     def fit(self, scale=True):
-        ln, lt = self.m(
+        ln, lt = (
             self.data.sel(geo="lon").values, self.data.sel(geo="lat").values
         )
         ff = pd.concat([self._wavelet_features(lt), self._wavelet_features(ln)])

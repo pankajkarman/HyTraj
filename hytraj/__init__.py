@@ -71,26 +71,24 @@ model.plot_map(rtwc, boundinglat=-25)
 ```
 """
 
-
 import os, glob
 import pandas as pd, numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
 from shutil import copyfile, copy2, rmtree
-from mpl_toolkits.basemap import Basemap, addcyclic, cm
-
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 from .hygen import HyGen, HyControl, HyParallel
 from .hyread import HyData
 from .hymodel import HyReceptor
 from .hycluster import HyCluster
-from .hyagg import HyHAC
+#from .hyagg import HyHAC
 from .hyplot import ClusterPlot
-
 
 class HyTraj:
     def __init__(
-        self, locations, height, run_time, working, metdir, outdir, met_type="ncep"
+        self, locations, height, run_time, working, metdir, outdir, met_type="ncep_new"
     ):
 
         self.run_time = run_time
@@ -128,19 +126,19 @@ class HyTraj:
         files = sorted(glob.glob(self.outdir + "*"))
         data = HyData(files, list(self.locations.keys())).read()
         return data
-
-    @staticmethod
+    
+    @staticmethod    
     def plot(
         ds,
         vertical="pre",
         grid={"height_ratios": [2.1, 1.25]},
-        pad=dict(wspace=0, hspace=0, left=0.06, bottom=0.09, right=0.9, top=0.99),
-        proj=dict(projection="robin", lon_0=0, boundinglat=-60),
+        proj=ccrs.Robinson(),
+        traj_color='grey', 
         show=True,
     ):
-        fig, axes = plt.subplots(2, 1, figsize=(10, 11), gridspec_kw=grid)
-
-        ax = axes[1]
+    
+        fig = plt.figure(figsize=(10, 10))
+        ax = fig.add_subplot(2, 1, 2)
         ax.set_xlabel("Step [hr]")
         df = ds.sel(geo=vertical).squeeze().to_pandas()
         for col in df.columns:
@@ -151,15 +149,16 @@ class HyTraj:
         else:
             ax.set_ylabel("Pressure [hPa]")
             ax.invert_yaxis()
-
-        ax = axes[0]
-        m = Basemap(**proj, ax=ax)
-        m.drawcoastlines(linewidth=0.6)
-        m.drawcountries(linewidth=0.6)
+    
+        ax = fig.add_subplot(2, 1, 1, projection=proj)
+        ax.add_feature(cfeature.COASTLINE)
+        ax.add_feature(cfeature.LAND, color="lightgrey", alpha=0.5)
+        ax.add_feature(cfeature.OCEAN, color="skyblue", alpha=0.4)
+        
         for i in np.arange(len(ds.time)):
             df = ds.sel(geo=["lat", "lon"]).isel(time=i).to_pandas().T
-            xx, yy = m(df["lon"].values, df["lat"].values)
-            m.plot(xx, yy, color="grey", lw=3)
-        fig.subplots_adjust(**pad)
+            xx, yy = (df["lon"].values, df["lat"].values)
+            ax.plot(xx, yy, color=traj_color, lw=3, transform=ccrs.PlateCarree())
+            ax.set_global()
         if show:
             plt.show()

@@ -1,9 +1,9 @@
-matplotlib==3.2.1
-sklearn
+matplotlib
+cartopy
+scikit-learn
 PyWavelets
 pyclustering
 fastcluster
-traj_dist
 numpy
 scipy
 pandas

@@ -3,13 +3,12 @@ import pandas as pd
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
-from mpl_toolkits.basemap import Basemap, addcyclic, cm
-
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
 def normalize(data):
     data = (data - data.min()) / (data.max() - data.min())
     return data
-
 
 class HyReceptor:
     def __init__(
@@ -131,26 +130,28 @@ class HyReceptor:
         bcwt[bcwt == 0] = np.nan
         self.rtwc = self.to_nc(bcwt, name="RTWC")
         return self.rtwc
-
-    def plot_map(self, pscf, boundinglat=-20, axes=[]):
-        if len(axes) == 0:
-            fig, ax = plt.subplots(1, 1, figsize=(6, 6))
+        
+    def plot_map(self, pscf, boundinglats=[-60, -90], axes=[], cmap='jet'):
+        if len(axes) == 0:        
+            fig = plt.figure(figsize=(8, 8))
+            ax = plt.subplot(111, projection=ccrs.SouthPolarStereo())
             cax = fig.add_axes([0.15, 0.06, 0.7, 0.04])
         else:
             fig, ax, cax = axes
-        m = Basemap(
-            projection="spstere", lon_0=180, boundinglat=boundinglat, round=True, ax=ax
-        )
-        data, lonx = addcyclic(pscf.T.values, pscf["Longitude"])
+        
+        data, lonx = (pscf.T.values, pscf["Longitude"])
         latx, lonx = np.meshgrid(pscf["Latitude"], lonx)
-        lonx, latx = m(lonx, latx)
+        lonx, latx = (lonx, latx)
         if pscf.max().values <= 1:
-            h = m.contourf(lonx, latx, data.T, levels=np.arange(0, 1.1, 0.1))
+            h = ax.contourf(lonx, latx, data.T, levels=np.arange(0, 1.1, 0.1), transform=ccrs.PlateCarree(), cmap=cmap)
         else:
             levels = np.arange(0, pscf.max(), 2)
-            h = m.contourf(lonx, latx, data.T, levels=levels)
+            h = ax.contourf(lonx, latx, data.T, levels=levels, transform=ccrs.PlateCarree(), cmap=cmap)
         plt.colorbar(h, cax=cax, orientation="horizontal")
-        m.drawcoastlines(linewidth=1.5)
-        m.drawcountries(linewidth=0.55)
         ax.set_title(self.station, fontweight="bold")
-        return fig, ax, m
+        ax.add_feature(cfeature.LAND, color="lightgrey", alpha=0.5)
+        ax.add_feature(cfeature.OCEAN, color="skyblue", alpha=0.4)
+        ax.gridlines()
+        ax.coastlines()
+        ax.set_extent([0, 360, boundinglats[0], boundinglats[1]], crs=ccrs.PlateCarree())
+        return fig, ax
