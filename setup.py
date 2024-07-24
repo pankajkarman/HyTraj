@@ -20,6 +20,6 @@ setup(
      packages=find_packages(),
      py_modules=['hytraj'],
      install_requires=install_req,
-     python_requires="==3.8",
+     python_requires=">=3.6",
      setup_requires=['setuptools'],
 )
